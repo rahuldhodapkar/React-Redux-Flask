@@ -7,6 +7,8 @@ import Drawer from 'material-ui/Drawer';
 import MenuItem from 'material-ui/MenuItem';
 import FlatButton from 'material-ui/FlatButton';
 import Divider from 'material-ui/Divider';
+import IconButton from 'material-ui/IconButton';
+import NavigationClose from 'material-ui/svg-icons/navigation/close';
 
 import * as actionCreators from '../../actions/auth';
 
@@ -41,7 +43,7 @@ export class Header extends Component {
     }
 
 
-    handleClickOutside() {
+    closeNav() {
         this.setState({
             open: false,
         });
@@ -78,6 +80,12 @@ export class Header extends Component {
                             </div>
                             :
                             <div>
+                                <AppBar
+                                    title="Menu"
+                                    showMenuIconButton={false}
+                                    onRightIconButtonTouchTap={() => this.closeNav()}
+                                    iconElementRight={<IconButton><NavigationClose /></IconButton>}
+                                />
                                 <MenuItem onClick={() => this.dispatchNewRoute('/analytics')}>
                                     Analytics
                                 </MenuItem>
