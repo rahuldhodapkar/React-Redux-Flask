@@ -96,6 +96,11 @@ export class Header extends Component {
                                 </MenuItem>
 
                                 <Divider />
+                                <MenuItem onClick={() => this.dispatchNewRoute('/chat')}>
+                                    Chat
+                                </MenuItem>
+
+                                <Divider />
                                 <MenuItem onClick={(e) => this.logout(e)}>
                                     Logout
                                 </MenuItem>
