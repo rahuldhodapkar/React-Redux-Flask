@@ -2,82 +2,145 @@ import React from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import * as actionCreators from '../actions/auth';
-import {Card, CardActions, CardHeader, CardText} from 'material-ui/Card';
-import FlatButton from 'material-ui/FlatButton';
-import {GridList, GridTile} from 'material-ui/GridList';
+import { Card, CardActions, CardMedia, CardHeader } from 'material-ui/Card';
+import LinearProgress from 'material-ui/LinearProgress';
+import RaisedButton from 'material-ui/RaisedButton';
+import {CardText} from 'material-ui/Card';
+import Chip from 'material-ui/Chip';
+import Avatar from 'material-ui/Avatar';
 
-function mapStateToProps(state) {
-    return {
-        isRegistering: state.auth.isRegistering,
-        registerStatusText: state.auth.registerStatusText,
-    };
-}
+import Paper from 'material-ui/Paper';
+import TextField from 'material-ui/TextField';
 
-function mapDispatchToProps(dispatch) {
-    return bindActionCreators(actionCreators, dispatch);
-}
-
-class ThreadDiv extends React.Component {
+class Message extends React.Component {
     constructor(props) {
         super(props);
+        this.state = {
+          text : '',
+          authorType : '',
+          authorImage : '',
+          messageTime : ''
+        }
+        this.authorTypes = {
+          'sender'   : 'sender',
+          'receiver' : 'receiver'
+        };   
+        const chipStyle = {
+          margin  : 4,
+          float : 'right'
+        };
+    }
+
+    componentWillReceiveProps(newProps) {
+      this.state.text = newProps.text;
+      this.state.authorType = newProps.authorType;
+      this.state.authorImage = newProps.authorImage;
+      this.state.messageTime = newProps.messageTime;
     }
 
     render() {
-        return (
-            <Card id={this.props.id}
-                  containerStyle={{ margin: 10}}>
-                <CardHeader
-                    title={this.props.title}
-                    subtitle={this.props.date}
-                />
+        var messageComponent, authorTypeStyle, messageStyle;
+        if(this.state.authorType === this.authorTypes.sender ) {
+          authorTypeStyle = {
+            float : 'right'
+          }
+          messageStyle = {
+            float : 'right',
+            margin : 10
+          }
+          return (
             <CardText>
-                {this.props.desc}
+              <span style={messageStyle}>{this.state.messageTime}</span>
+              <Chip style={authorTypeStyle} >
+                <Avatar src={this.state.authorImage} />
+                <div>{this.state.text}</div>
+              </Chip>              
+            </CardText> 
+          );
+        } else {
+          authorTypeStyle = {
+            float : 'left'
+          }
+          messageStyle = {
+            float : 'left',
+            margin : 10
+          }
+          return (
+            <CardText>
+              <Chip style={authorTypeStyle} >
+                <Avatar src={this.state.authorImage} />
+                <div>{this.state.text}</div>
+              </Chip>            
+              <span style={messageStyle}>{this.state.messageTime}</span>
             </CardText>
-            <CardActions>
-                <FlatButton label="Chat" />
-            </CardActions>
-            </Card>
-        );
+            
+          );
+        }
+        
     }
 }
 
-@connect(mapStateToProps, mapDispatchToProps)
-class ChatView extends React.Component { // eslint-disable-line react/prefer-stateless-function
-    
+const paperStyle = {
+    width: 600,
+    margin: 20,
+    textAlign: 'center',
+    display: 'inline-block',
+};
+
+const textFieldStyle = {
+  paddingLeft: 16, 
+  paddingRight: 16
+};
+
+class ChatView extends React.Component {
     constructor(props) {
         super(props);
+        this.state = {
+            expanded: false,
+            messages: [
+                {text: "Hi", authorType:"receiver", messageTime:"08:40"},
+                {text: "How are you", authorType:"receiver", messageTime:"08:41"},
+                {text: "I am doing good", authorType:"sender", messageTime:"08:42"},
+                {text: "How about you ?", authorType:"sender", messageTime:"08:43"},
+            ]
+        };
 
-        this.generateMockData = this.generateMockData.bind(this);
+        this.updateMessages = this.updateMessages.bind(this);
     }
 
-    generateMockData() {
-        return [{
-            id: 1,
-            title: "Help out with some bioinformatics",
-            desc: "I need a little bit of help with working through some of these bioinformatics questions, are there any people out there who can help?",
-            date: "11/9/18"
-        },
-        {
-            id: 2,
-            title: "Want to understand bitcoin better",
-            desc: "Let's talk about some specifics on how miners get paid.",
-            date: "15/5/23"
-        }];
+    updateMessages(e) {
+        e.preventDefault();
+        const data = new FormData(e.target);
+        let newmsg = data.get("message");
+        console.log(newmsg);
+        this.setState( function(state, props){
+            console.log(state)
+            console.log(state.messages)
+            state.messages.push({ text: newmsg, authorType: "sender", messageTime: "10:23" })
+            return {
+                messages: state.messages
+            }
+        });
     }
 
     render() {
         return (
-            <div className="col-md-8">
-                <h1>Threads</h1>
-                <hr />
-                {this.generateMockData().map( (d) => {
-                    return (<ThreadDiv title={d.title}
-                               desc={d.desc}
-                               id={d.id}
-                               date={d.date}
-                               key={d.id} />)
-                })}
-            </div>
+          <Paper style={paperStyle} zDepth={1} >
+            <Card>
+              <CardHeader
+                title="James Anderson"
+                subtitle="Online"
+              />
+              {this.state.messages.map((m) => {
+                    return (<div key={m.text}><Message text={m.text} authorType={m.authorType} messageTime={m.messageTime} /><br/></div>);
+              })}
+
+            </Card>
+            <form onSubmit={this.updateMessages}>
+                <TextField name="message" hintText="Type a Message" fullWidth={true} inputStyle={textFieldStyle} 
+                hintStyle={textFieldStyle} />
+            </form>
+          </Paper>
         );
     }
 }
